@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Revenue Report</title>
+</head>
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+    <div style="max-width:650px; margin:auto; background:white; padding:25px; border-radius:8px;">
+
+        <h2 style="color:#222;">Daily Revenue Report</h2>
+        <p>Hello {{userName}},</p>
+        
+        <p>Here is the complete revenue report for <strong>{{date}}</strong>:</p>
+
+        <table style="width:100%; border-collapse:collapse; margin-top:15px;">
+            <tr>
+                <td style="padding:10px; border:1px solid #ccc;">Room Revenue</td>
+                <td style="padding:10px; border:1px solid #ccc;"><strong>₹{{roomRevenue}}</strong></td>
+            </tr>
+
+            <tr>
+                <td style="padding:10px; border:1px solid #ccc;">Facility Revenue</td>
+                <td style="padding:10px; border:1px solid #ccc;"><strong>₹{{facilityRevenue}}</strong></td>
+            </tr>
+
+            <tr>
+                <td style="padding:10px; border:1px solid #ccc;">Food & Beverages</td>
+                <td style="padding:10px; border:1px solid #ccc;"><strong>₹{{fnbRevenue}}</strong></td>
+            </tr>
+
+            <tr>
+                <td style="padding:10px; border:1px solid #ccc;">Other Charges</td>
+                <td style="padding:10px; border:1px solid #ccc;"><strong>₹{{otherRevenue}}</strong></td>
+            </tr>
+
+            <tr style="background:#f0f0f0;">
+                <td style="padding:10px; border:1px solid #ccc;"><strong>Total Revenue</strong></td>
+                <td style="padding:10px; border:1px solid #ccc;"><strong>₹{{total}}</strong></td>
+            </tr>
+        </table>
+
+        <p style="margin-top:20px;">
+            For detailed analytics, please check the Superadmin Dashboard.
+        </p>
+
+        <p style="font-size:14px; color:#666;">— Hotel Management System</p>
+    </div>
+</body>
+</html>

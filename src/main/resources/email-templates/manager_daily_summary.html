@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Summary Report</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color:#f7f7f7; padding:20px;">
+    <div style="max-width:600px; margin:auto; background:white; padding:20px; border-radius:8px;">
+        
+        <h2 style="color:#333;">Hello {{userName}},</h2>
+        <p style="color:#555; font-size:16px;">
+            Here is your <strong>Daily Manager Summary</strong> for {{date}}.
+        </p>
+
+        <h3 style="color:#222;">📌 Booking Summary</h3>
+        <ul>
+            <li>Total Bookings: <strong>{{totalBookings}}</strong></li>
+            <li>Checked-in Today: <strong>{{checkedIn}}</strong></li>
+            <li>Checked-out Today: <strong>{{checkedOut}}</strong></li>
+        </ul>
+
+        <h3 style="color:#222;">📌 Facility Usage</h3>
+        <ul>
+            <li>Facility Bookings: <strong>{{facilityBookings}}</strong></li>
+            <li>Top Facility: <strong>{{topFacility}}</strong></li>
+        </ul>
+
+        <h3 style="color:#222;">📌 Staff Activity</h3>
+        <ul>
+            <li>Tasks Assigned Today: <strong>{{staffTasks}}</strong></li>
+            <li>Pending Maintenance: <strong>{{pendingMaintenance}}</strong></li>
+        </ul>
+
+        <p style="margin-top:20px;">
+            For more details, visit the admin dashboard.
+        </p>
+
+        <p style="font-size:14px; color:#888;">
+            — Hotel Management System
+        </p>
+
+    </div>
+</body>
+</html>

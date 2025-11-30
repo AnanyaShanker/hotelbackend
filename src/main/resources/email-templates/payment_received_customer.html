@@ -1,0 +1,39 @@
+payment_received_customer.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Receipt</title>
+</head>
+<body style="font-family: Arial, sans-serif;">
+
+    <h2 style="color:#2c3e50;">Payment Received Successfully</h2>
+
+    <p>Dear {{customerName}},</p>
+
+    <p>We have received your payment.</p>
+
+    <p><strong>Transaction Details:</strong></p>
+
+    <table style="border-collapse: collapse;">
+        <tr>
+            <td><strong>Transaction ID:</strong></td>
+            <td>{{transactionId}}</td>
+        </tr>
+        <tr>
+            <td><strong>Amount Paid:</strong></td>
+            <td>Rs {{amount}}</td>
+        </tr>
+        <tr>
+            <td><strong>Booking ID:</strong></td>
+            <td>{{bookingId}}</td>
+        </tr>
+    </table>
+
+    <p>You will find your detailed payment receipt attached as a PDF.</p>
+
+    <p>Thank you for choosing our hotel!</p>
+
+</body>
+</html>

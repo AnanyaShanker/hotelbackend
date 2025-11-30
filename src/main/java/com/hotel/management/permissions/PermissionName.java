@@ -1,0 +1,16 @@
+package com.hotel.management.permissions;
+
+public enum PermissionName {
+	VIEW_ROOMS,
+	VIEW_BOOKINGS,
+	MANAGE_BOOKINGS,
+	BOOK_ROOM,
+	MANAGE_ROOMS,
+	CANCEL_OWN_BOOKING,
+	VIEW_OWN_BOOKINGS,
+	VIEW_REPORTS,
+	MANAGE_USERS,
+	ASSIGN_PERMISSIONS
+
+
+}

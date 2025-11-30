@@ -1,0 +1,20 @@
+2025-11-25T20:26:45.528+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] c.h.management.HotelBackendApplication   : Starting HotelBackendApplication using Java 17.0.6 with PID 20384 (C:\Users\703440113\Desktop\hotel-backend\target\classes started by 703440113 in C:\Users\703440113\Desktop\hotel-backend)
+2025-11-25T20:26:45.535+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] c.h.management.HotelBackendApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-11-25T20:26:45.833+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9192 (http)
+2025-11-25T20:26:45.834+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-11-25T20:26:45.837+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-11-25T20:26:45.856+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-11-25T20:26:45.856+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 317 ms
+2025-11-25T20:26:45.966+05:30  WARN 20384 --- [EmployeeTaskMgmt] [restartedMain] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: b7bc8a28-c6ab-4180-81f1-ff469aba2514
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2025-11-25T20:26:45.967+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2025-11-25T20:26:45.991+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-11-25T20:26:46.002+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9192 (http) with context path '/'
+2025-11-25T20:26:46.006+05:30  INFO 20384 --- [EmployeeTaskMgmt] [restartedMain] c.h.management.HotelBackendApplication   : Started HotelBackendApplication in 0.519 seconds (process running for 750.766)
+2025-11-25T20:26:51.720+05:30  INFO 20384 --- [EmployeeTaskMgmt] [RMI TCP Connection(15)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2025-11-25T20:26:51.721+05:30  INFO 20384 --- [EmployeeTaskMgmt] [RMI TCP Connection(15)-127.0.0.1] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-11-25T20:26:52.107+05:30  INFO 20384 --- [EmployeeTaskMgmt] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
