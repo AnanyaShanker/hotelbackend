@@ -40,7 +40,12 @@ public class FacilityBookingRepository {
 
     public FacilityBooking findById(int id) {
         String sql = "SELECT * FROM facility_bookings WHERE facility_booking_id = ?";
-        return jdbcTemplate.queryForObject(sql, (rs, rn) -> map(rs), id);
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rn) -> map(rs), id);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            System.err.println("❌ No facility booking found with ID: " + id);
+            return null;
+        }
     }
 
     public FacilityBookingFullDTO findFullById(int id) {
@@ -51,8 +56,18 @@ public class FacilityBookingRepository {
                 "LEFT JOIN users u ON u.user_id = fb.customer_id " +
                 "LEFT JOIN facilities f ON f.facility_id = fb.facility_id " +
                 "LEFT JOIN payments p ON p.facility_booking_id = fb.facility_booking_id " +
+                "AND p.payment_id = (SELECT MAX(payment_id) FROM payments WHERE facility_booking_id = fb.facility_booking_id) " +
                 "WHERE fb.facility_booking_id = ?";
-        return jdbcTemplate.queryForObject(sql, (rs, rn) -> mapFull(rs), id);
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rn) -> mapFull(rs), id);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            System.err.println("❌ No facility booking found with ID: " + id);
+            return null;
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching facility booking details for ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public List<FacilityBooking> findByFacilityAndDate(int facilityId, LocalDate bookingDate) {

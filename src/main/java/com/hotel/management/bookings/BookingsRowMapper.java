@@ -14,9 +14,8 @@ public class BookingsRowMapper implements RowMapper<Bookings> {
         b.setBranchId((Integer) rs.getObject("branch_id"));
         b.setCheckInDate(rs.getTimestamp("check_in_date"));
         b.setCheckOutDate(rs.getTimestamp("check_out_date"));
-        b.setPricePerNight(rs.getDouble("price_per_night"));
-        b.setTotalDays(rs.getInt("total_days"));
         b.setTotalPrice(rs.getDouble("total_price"));
+        b.setPaymentStatus(rs.getString("payment_status"));
         b.setBookingStatus(rs.getString("booking_status"));
         b.setNotes(rs.getString("notes"));
         b.setCreatedAt(rs.getTimestamp("created_at"));

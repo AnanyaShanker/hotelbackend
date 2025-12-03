@@ -18,6 +18,7 @@ public class RoomRowMapper implements RowMapper<Room> {
         room.setRoomPrimaryImage(rs.getString("room_primary_image"));
         room.setDescription(rs.getString("description"));
         room.setFloorNumber(rs.getInt("floor_number"));
+        room.setLastCleaned(rs.getTimestamp("last_cleaned"));
         room.setCreatedAt(rs.getTimestamp("created_at"));
         room.setUpdatedAt(rs.getTimestamp("updated_at"));
         return room;

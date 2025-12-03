@@ -8,6 +8,9 @@ public interface BookingsService {
     Bookings getBookingById(int bookingId);
     List<Bookings> getAllBookings();
     List<Bookings> getBookingsByBranch(int branchId);
+    List<Bookings> getBookingsByCustomer(int customerId);
+    void updatePaymentStatus(int bookingId, String paymentStatus);
+    BookingsDTO getBookingDetails(int bookingId);
     void cancelBooking(int bookingId);
     void completeBooking(int bookingId);
     void updateBookingStatusBasedOnPayment(Payment payment);

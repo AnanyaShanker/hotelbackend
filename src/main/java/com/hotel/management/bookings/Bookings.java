@@ -12,6 +12,7 @@ public class Bookings {
     private double pricePerNight;
     private int totalDays;
     private double totalPrice;
+    private String paymentStatus; // PENDING, PAID, FAILED
     private String bookingStatus; //  CONFIRMED, CANCELLED, COMPLETED
     private String notes;
     private Timestamp createdAt;
@@ -69,6 +70,12 @@ public class Bookings {
 	}
 	public void setTotalPrice(double totalPrice) {
 		this.totalPrice = totalPrice;
+	}
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
 	}
 	public String getBookingStatus() {
 		return bookingStatus;

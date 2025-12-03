@@ -1,8 +1,10 @@
 package com.hotel.management.users;
  
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hotel.management.exception.DuplicateEmailException;
 import com.hotel.management.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
  
@@ -19,12 +21,18 @@ public class UserServiceImpl implements UserService {
  
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
  
 	private final ObjectMapper objectMapper = new ObjectMapper();
  
 	@Override
 	public UserDTO createUser(UserDTO dto) {
 	    // map dto -> user
+		
+		if (userRepository.emailExists(dto.getEmail())) {
+	        throw new DuplicateEmailException("Email already registered");
+	    }
 	    User user = UserMapper.toUser(dto);
  
 	    // 🔹 PASSWORD SALT & HASH
@@ -61,6 +69,8 @@ public class UserServiceImpl implements UserService {
  
 	    int generatedId = userRepository.save(user);
 	    user.setUserId(generatedId);
+	    
+	    eventPublisher.publishEvent(new UserCreatedEvent(user.getUserId()));
  
 	    return UserMapper.toDTO(user);
 	}

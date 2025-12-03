@@ -23,4 +23,5 @@ public interface UserRepository {
     // Utility queries
     boolean existsByIdAndActive(int id);
     String getEmailById(int id);
+    boolean emailExists(String email);
 }

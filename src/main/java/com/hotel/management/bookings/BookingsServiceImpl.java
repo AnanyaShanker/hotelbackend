@@ -33,18 +33,23 @@
 		    booking.setRoomId(room.getRoomId());
 		    booking.setBranchId(branchId);
 		    booking.setBookingStatus("CONFIRMED");  // customer booking created before payment
-		    booking.setTotalDays(calculateDays(booking.getCheckInDate(), booking.getCheckOutDate()));
-		    booking.setTotalPrice(room.getPricePerNight() * booking.getTotalDays());
+
+		    // Calculate total price based on days and price per night
+		    long totalDays = calculateDays(booking.getCheckInDate(), booking.getCheckOutDate());
+		    booking.setTotalPrice(room.getPricePerNight() * totalDays);
 
 		    Bookings saved = bookingsRepository.save(booking);
+
+		    // Fetch complete booking with generated ID (saved now has the ID set by KeyHolder)
+		    Bookings complete = bookingsRepository.findById(saved.getBookingId());
 
 		    // Set room to OCCUPIED
 		    roomService.changeRoomStatus(room.getRoomId(), "OCCUPIED");
 
 		 
-		    eventPublisher.publishEvent(new BookingCreatedEvent(saved));
+		    eventPublisher.publishEvent(new BookingCreatedEvent(complete));
 
-		    return saved;
+		    return complete;
 		}
 		
 		 private long calculateDays(Timestamp checkIn, Timestamp checkOut) {
@@ -62,13 +67,54 @@
 	        return bookingsRepository.findAll();
 	    }
 	
-	    @Override
-	    public List<Bookings> getBookingsByBranch(int branchId) {
-	        return bookingsRepository.findByBranch(branchId);
-	    }
-	
-	    @Override
-	    public void cancelBooking(int bookingId) {
+    @Override
+    public List<Bookings> getBookingsByBranch(int branchId) {
+        return bookingsRepository.findByBranch(branchId);
+    }
+
+    @Override
+    public List<Bookings> getBookingsByCustomer(int customerId) {
+        return bookingsRepository.findByCustomer(customerId);
+    }
+
+    @Override
+    public void updatePaymentStatus(int bookingId, String paymentStatus) {
+        bookingsRepository.updatePaymentStatus(bookingId, paymentStatus);
+    }
+
+    @Override
+    public BookingsDTO getBookingDetails(int bookingId) {
+        Bookings booking = bookingsRepository.findById(bookingId);
+        if (booking == null) {
+            throw new IllegalArgumentException("Booking not found with ID: " + bookingId);
+        }
+
+        Room room = roomService.getRoomById(booking.getRoomId());
+
+        BookingsDTO dto = new BookingsDTO();
+        dto.setBookingId(booking.getBookingId());
+        dto.setCustomerId(booking.getCustomerId());
+        dto.setRoomId(booking.getRoomId());
+        dto.setBranchId(booking.getBranchId());
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setTotalPrice(booking.getTotalPrice());
+        dto.setPaymentStatus(booking.getPaymentStatus());
+        dto.setBookingStatus(booking.getBookingStatus());
+        dto.setNotes(booking.getNotes());
+        dto.setCreatedAt(booking.getCreatedAt());
+        dto.setUpdatedAt(booking.getUpdatedAt());
+
+        if (room != null) {
+            dto.setRoomNumber(room.getRoomNumber());
+            dto.setPricePerNight(room.getPricePerNight());
+        }
+
+        return dto;
+    }
+
+    @Override
+    public void cancelBooking(int bookingId) {
 	        Bookings booking = bookingsRepository.findById(bookingId);
 	        bookingsRepository.updateStatus(bookingId, "CANCELLED");
 	        roomService.changeRoomStatus(booking.getRoomId(), "AVAILABLE");

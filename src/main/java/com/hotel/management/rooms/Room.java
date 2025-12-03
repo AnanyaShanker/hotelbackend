@@ -13,6 +13,7 @@ public class Room {
     private String roomPrimaryImage;
     private String description;
     private Integer floorNumber;
+    private Timestamp lastCleaned;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -46,6 +47,9 @@ public class Room {
 
     public Integer getFloorNumber() { return floorNumber; }
     public void setFloorNumber(Integer floorNumber) { this.floorNumber = floorNumber; }
+
+    public Timestamp getLastCleaned() { return lastCleaned; }
+    public void setLastCleaned(Timestamp lastCleaned) { this.lastCleaned = lastCleaned; }
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }

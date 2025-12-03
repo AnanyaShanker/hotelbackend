@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/roomtypes")
+@RequestMapping({"/api/roomtypes", "/api/room-types"})
 public class RoomTypeController {
 
 	@Autowired

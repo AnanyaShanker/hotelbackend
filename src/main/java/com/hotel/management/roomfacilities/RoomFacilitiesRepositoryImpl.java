@@ -19,25 +19,26 @@ public class RoomFacilitiesRepositoryImpl implements RoomFacilitiesRepository {
 
     @Override
     public List<RoomFacilities> findAll() {
-        String sql = "SELECT * FROM room_facilities WHERE status = 'ACTIVE'";
+        String sql = "SELECT * FROM room_facilities";
         return jdbcTemplate.query(sql, new RoomFacilitiesRowMapper());
     }
 
     @Override
     public void save(RoomFacilities rf) {
-        String sql = "INSERT INTO room_facilities (room_id, facility_name, description, status) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, rf.getRoomId(), rf.getFacilityName(), rf.getDescription(), rf.getStatus());
+        String sql = "INSERT INTO room_facilities (room_id, facility_name, description) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, rf.getRoomId(), rf.getFacilityName(), rf.getDescription());
     }
 
     @Override
     public void update(RoomFacilities rf) {
-        String sql = "UPDATE room_facilities SET facility_name=?, description=?, status=? WHERE rf_id=?";
-        jdbcTemplate.update(sql, rf.getFacilityName(), rf.getDescription(), rf.getStatus(), rf.getRfId());
+        String sql = "UPDATE room_facilities SET facility_name=?, description=? WHERE rf_id=?";
+        jdbcTemplate.update(sql, rf.getFacilityName(), rf.getDescription(), rf.getRfId());
     }
 
     @Override
     public void softDelete(int rfId) {
-        String sql = "UPDATE room_facilities SET status='INACTIVE' WHERE rf_id=?";
+        // Since status column doesn't exist, do hard delete instead
+        String sql = "DELETE FROM room_facilities WHERE rf_id=?";
         jdbcTemplate.update(sql, rfId);
     }
 }

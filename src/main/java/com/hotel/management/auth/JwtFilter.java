@@ -1,5 +1,5 @@
 package com.hotel.management.auth;
- 
+
 import jakarta.servlet.FilterChain;
 
 import jakarta.servlet.ServletException;
@@ -13,83 +13,101 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import org.springframework.web.filter.OncePerRequestFilter;
- 
+
 import java.io.IOException;
- 
+
 @Component
 
 public class JwtFilter extends OncePerRequestFilter {
- 
-	@Autowired
 
-	private JwtUtil jwtUtil;
- 
-	@Override
+    @Autowired
 
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    private JwtUtil jwtUtil;
 
-			throws ServletException, IOException {
- 
-		String path = request.getRequestURI();
- 
-		// Allow login & create-user without token
+    @Override
 
-		boolean isLogin = path.equals("/api/users/login");
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 
-		boolean isCreateUser = path.equals("/api/users") 
-&& request.getMethod().equalsIgnoreCase("POST");
+            throws ServletException, IOException {
 
-		boolean isStaticFiles = path.startsWith("/uploads/");
- 
-		if (isLogin || isCreateUser || isStaticFiles) {
+        String path = request.getRequestURI();
 
-		 filterChain.doFilter(request, response);
+        // Public endpoints that don't require authentication
+        boolean isPublicEndpoint =
+                // Auth endpoints
+                path.startsWith("/api/auth/") ||
+                        path.equals("/api/users/login") ||
+                        (path.equals("/api/users") && request.getMethod().equalsIgnoreCase("POST")) ||
 
-		 return;
+                        // Static files
+                        path.startsWith("/uploads/") ||
+                        path.startsWith("/media/") ||
 
-		}
- 
- 
-		String auth = request.getHeader("Authorization");
- 
-		if (auth == null || !auth.startsWith("Bearer ")) {
+                        // Activity logs (for monitoring)
+                        path.startsWith("/api/activity-logs/") ||
+                        path.startsWith("/api/activity-demo/") ||
 
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        // Facilities and bookings (public access for browsing)
+                        path.startsWith("/facilities/") ||
+                        path.startsWith("/facility-bookings/") ||
 
-			response.getWriter().write("Missing or invalid Authorization header");
+                        // Rooms (public access for browsing available rooms)
+                        (path.startsWith("/api/rooms") && request.getMethod().equalsIgnoreCase("GET")) ||
 
-			return;
+                        // Branches (public access for viewing locations)
+                        (path.startsWith("/api/branches") && request.getMethod().equalsIgnoreCase("GET")) ||
 
-		}
- 
-		String token = auth.substring(7);
- 
-		if (!jwtUtil.validateToken(token)) {
+                        // Room types (public access for browsing)
+                        (path.startsWith("/api/roomtypes") && request.getMethod().equalsIgnoreCase("GET")) ||
 
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        // Payments (public GET access for retrieving payment info)
+                        (path.startsWith("/api/payments/") && request.getMethod().equalsIgnoreCase("GET"));
 
-			response.getWriter().write("Invalid or expired token");
+        if (isPublicEndpoint) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-			return;
 
-		}
- 
-		// Extract user info
+        String auth = request.getHeader("Authorization");
 
-		Integer userId = jwtUtil.getUserId(token);
+        if (auth == null || !auth.startsWith("Bearer ")) {
 
-		Integer roleId = jwtUtil.getRoleId(token);
- 
-		// Attach attributes for RBAC checks
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-		request.setAttribute("userId", userId);
+            response.getWriter().write("Missing or invalid Authorization header");
 
-		request.setAttribute("roleId", roleId);
- 
-		filterChain.doFilter(request, response);
+            return;
 
-	}
+        }
+
+        String token = auth.substring(7);
+
+        if (!jwtUtil.validateToken(token)) {
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            response.getWriter().write("Invalid or expired token");
+
+            return;
+
+        }
+
+        // Extract user info
+
+        Integer userId = jwtUtil.getUserId(token);
+
+        Integer roleId = jwtUtil.getRoleId(token);
+
+        // Attach attributes for RBAC checks
+
+        request.setAttribute("userId", userId);
+
+        request.setAttribute("roleId", roleId);
+
+        filterChain.doFilter(request, response);
+
+    }
 
 }
 
- 
