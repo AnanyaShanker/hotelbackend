@@ -1,3 +1,4 @@
+
 package com.hotel.management.users;
  
 import java.util.List;
@@ -33,7 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hotel.management.dto.ApiResponseDTO;
 
 import com.hotel.management.auth.JwtUtil;
- 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
+import java.util.HashMap;
+
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/users")
@@ -47,7 +51,10 @@ public class UserController {
 	@Autowired
 
 	private JwtUtil jwtUtil;
- 
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 
 	public ResponseEntity<ApiResponseDTO<UserDTO>> createUser(@ModelAttribute UserDTO dto) {
@@ -61,31 +68,61 @@ public class UserController {
 	}
  
 	@PostMapping("/login")
-
 	public ResponseEntity<ApiResponseDTO<?>> login(@RequestBody UserDTO dto) {
+		// Validate credentials and get user info
+		UserDTO user = userService.login(dto.getEmail(), dto.getPassword());
 
-	 UserDTO user = userService.login(dto.getEmail(), dto.getPassword());
- 
-	 String token = jwtUtil.generateToken(user.getUserId(), user.getRoleId());
- 
-	 return ResponseEntity.ok(
+		int userId = user.getUserId();
+		int roleId = user.getRoleId();
 
-	 new ApiResponseDTO<>(200,
+		// Generate JWT token
+		String token = jwtUtil.generateToken(userId, roleId);
 
-	 "Login successful",
+		// Build response with user data
+		Map<String, Object> responseData = new HashMap<>();
+		responseData.put("user", user);
+		responseData.put("token", token);
+		responseData.put("userId", userId);
+		responseData.put("roleId", roleId);
+		responseData.put("name", user.getName());
+		responseData.put("email", user.getEmail());
 
-	 Map.of(
+		// ✅ If Manager (role_id = 3), find their branch
+		if (roleId == 3) {
+			try {
+				String sql = "SELECT branch_id, name FROM hotel_branches WHERE manager_id = ?";
+				Map<String, Object> branchInfo = jdbcTemplate.queryForMap(sql, userId);
+				responseData.put("branchId", branchInfo.get("branch_id"));
+				responseData.put("branchName", branchInfo.get("name"));
+			} catch (EmptyResultDataAccessException e) {
+				// Manager not assigned to any branch yet
+				responseData.put("branchId", null);
+				responseData.put("branchName", null);
+			}
+		}
 
-	 "user", user,
+		// ✅ If Staff (role_id = 2), find their staff_id and branch
+		if (roleId == 2) {
+			try {
+				String sql = "SELECT s.staff_id, s.hotel_id, hb.name as branch_name " +
+							 "FROM staff s " +
+							 "LEFT JOIN hotel_branches hb ON s.hotel_id = hb.branch_id " +
+							 "WHERE s.user_id = ?";
+				Map<String, Object> staffInfo = jdbcTemplate.queryForMap(sql, userId);
+				responseData.put("staffId", staffInfo.get("staff_id"));
+				responseData.put("branchId", staffInfo.get("hotel_id"));
+				responseData.put("branchName", staffInfo.get("branch_name"));
+			} catch (EmptyResultDataAccessException e) {
+				// Staff not created yet
+				responseData.put("staffId", null);
+				responseData.put("branchId", null);
+				responseData.put("branchName", null);
+			}
+		}
 
-	 "token", token
-
-	 )
-
-	 )
-
-	 );
-
+		return ResponseEntity.ok(
+			new ApiResponseDTO<>(200, "Login successful", responseData)
+		);
 	}
  
 	@GetMapping

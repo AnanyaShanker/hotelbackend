@@ -23,6 +23,20 @@ public class BranchRepositoryImpl implements BranchRepository {
 		this.insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("hotel_branches")
 				.usingGeneratedKeyColumns("branch_id");
 	}
+	
+	@Override
+	public Optional<Branch> findByManagerId(Integer managerId) {
+	    try {
+	        Branch branch = jdbcTemplate.queryForObject(
+	            "SELECT * FROM hotel_branches WHERE manager_id = ?",
+	            mapper,
+	            managerId
+	        );
+	        return Optional.ofNullable(branch);
+	    } catch (EmptyResultDataAccessException ex) {
+	        return Optional.empty();
+	    }
+	}
 
 	
 	@Override

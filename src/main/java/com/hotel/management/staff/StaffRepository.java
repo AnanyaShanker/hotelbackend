@@ -12,4 +12,7 @@ public interface StaffRepository {
     int updateHotel(int staffId, int hotelId);
     int updateStatus(int staffId, String status);
     boolean existsById(int staffId);
+
+    // Find staff by staff_identifier (e.g., ST-MUM-001)
+    Optional<Staff> findByStaffIdentifier(String staffIdentifier);
 }

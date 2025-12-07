@@ -4,15 +4,17 @@ import java.util.List;
 
 public interface BranchService {
 
-	BranchResponseDTO addBranch(BranchRequestDTO request);
+    BranchResponseDTO addBranch(BranchRequestDTO request);
 
-	BranchResponseDTO getBranchById(Integer id);
+    BranchResponseDTO getBranchById(Integer id);
 
-	List<BranchResponseDTO> getAllBranches();
+    BranchResponseDTO getBranchByManager(Integer managerId); // ⭐ NEW
 
-	List<BranchResponseDTO> getBranchesByLocation(String location);
+    List<BranchResponseDTO> getAllBranches();
 
-	BranchResponseDTO updateBranch(Integer id, BranchRequestDTO request);
+    List<BranchResponseDTO> getBranchesByLocation(String location);
 
-	void toggleStatus(Integer id);
+    BranchResponseDTO updateBranch(Integer id, BranchRequestDTO request);
+
+    void toggleStatus(Integer id);
 }

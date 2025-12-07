@@ -1,7 +1,5 @@
 package com.hotel.management.users;
 
-
-
 public class UserCreatedEvent {
     private final int userId;
 

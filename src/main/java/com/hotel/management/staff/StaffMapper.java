@@ -7,6 +7,13 @@ public class StaffMapper {
         dto.setUserId(s.getUserId());
         dto.setHotelId(s.getHotelId());
         dto.setStatus(s.getStatus());
+
+        // Map additional fields
+        dto.setStaffIdentifier(s.getStaffIdentifier());
+        dto.setDepartment(s.getDepartment());
+        dto.setHireDate(s.getHireDate());
+        dto.setReportsTo(s.getReportsTo());
+
         return dto;
     }
 
@@ -16,6 +23,13 @@ public class StaffMapper {
         s.setUserId(dto.getUserId());
         s.setHotelId(dto.getHotelId());
         s.setStatus(dto.getStatus());
+
+        // Map additional fields
+        s.setStaffIdentifier(dto.getStaffIdentifier());
+        s.setDepartment(dto.getDepartment());
+        s.setHireDate(dto.getHireDate());
+        s.setReportsTo(dto.getReportsTo());
+
         return s;
     }
 }

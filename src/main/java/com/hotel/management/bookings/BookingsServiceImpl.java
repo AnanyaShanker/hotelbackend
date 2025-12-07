@@ -1,5 +1,5 @@
-	package com.hotel.management.bookings;
-	
+package com.hotel.management.bookings;
+
 	import com.hotel.management.payment.Payment;
 	import com.hotel.management.rooms.Room;
 	import com.hotel.management.rooms.RoomService;
@@ -20,19 +20,47 @@
 		private org.springframework.context.ApplicationEventPublisher eventPublisher;
 	
 	
-		@Override
-		public Bookings createBooking(Bookings booking, int branchId, int typeId) {
+	@Override
+	public Bookings createBooking(Bookings booking, int branchId, int typeId) {
 
-		    List<Room> availableRooms = roomService.getAvailableRooms(branchId, typeId);
-		    if (availableRooms.isEmpty()) {
-		        throw new IllegalStateException("No available rooms for branch " + branchId + " and type " + typeId);
-		    }
+	    //  VALIDATION: Check dates are valid
+	    if (booking.getCheckInDate() == null || booking.getCheckOutDate() == null) {
+	        throw new IllegalArgumentException("Check-in and check-out dates are required");
+	    }
+
+	    if (booking.getCheckOutDate().before(booking.getCheckInDate()) ||
+	        booking.getCheckOutDate().equals(booking.getCheckInDate())) {
+	        throw new IllegalArgumentException("Check-out date must be after check-in date");
+	    }
+
+	    // Prevent booking in the past
+	    Timestamp now = new Timestamp(System.currentTimeMillis());
+	    if (booking.getCheckInDate().before(now)) {
+	        throw new IllegalArgumentException("Cannot book rooms in the past");
+	    }
+
+	    //  Check room availability for the specific date range (prevents double-booking)
+	    List<Room> availableRooms = roomService.getAvailableRoomsForDates(
+	        branchId,
+	        typeId,
+	        booking.getCheckInDate(),
+	        booking.getCheckOutDate()
+	    );
+
+	    if (availableRooms.isEmpty()) {
+	        throw new IllegalStateException(
+	            "No available rooms for branch " + branchId +
+	            " and type " + typeId +
+	            " from " + booking.getCheckInDate() +
+	            " to " + booking.getCheckOutDate()
+	        );
+	    }
 
 		    Room room = availableRooms.get(0);
 
 		    booking.setRoomId(room.getRoomId());
 		    booking.setBranchId(branchId);
-		    booking.setBookingStatus("CONFIRMED");  // customer booking created before payment
+		    booking.setBookingStatus("CONFIRMED");
 
 		    // Calculate total price based on days and price per night
 		    long totalDays = calculateDays(booking.getCheckInDate(), booking.getCheckOutDate());
@@ -40,13 +68,12 @@
 
 		    Bookings saved = bookingsRepository.save(booking);
 
-		    // Fetch complete booking with generated ID (saved now has the ID set by KeyHolder)
+		    // Fetch complete booking with generated ID
 		    Bookings complete = bookingsRepository.findById(saved.getBookingId());
 
-		    // Set room to OCCUPIED
-		    roomService.changeRoomStatus(room.getRoomId(), "OCCUPIED");
+		    // NOTE: Room status remains "AVAILABLE" - the booking record blocks the dates
+		    // This allows the same room to be booked for different, non-overlapping date ranges
 
-		 
 		    eventPublisher.publishEvent(new BookingCreatedEvent(complete));
 
 		    return complete;
@@ -115,28 +142,34 @@
 
     @Override
     public void cancelBooking(int bookingId) {
-	        Bookings booking = bookingsRepository.findById(bookingId);
+	        // Simply update booking status to CANCELLED
+	        // No need to change room status - date-based availability handles this
 	        bookingsRepository.updateStatus(bookingId, "CANCELLED");
-	        roomService.changeRoomStatus(booking.getRoomId(), "AVAILABLE");
 	    }
 	
 	    @Override
 	    public void completeBooking(int bookingId) {
-	        Bookings booking = bookingsRepository.findById(bookingId);
+	        // Simply update booking status to COMPLETED
+	        // No need to change room status - date-based availability handles this
 	        bookingsRepository.updateStatus(bookingId, "COMPLETED");
-	        roomService.changeRoomStatus(booking.getRoomId(), "AVAILABLE");
 	    }
-	
 	    @Override
-	    public void updateBookingStatusBasedOnPayment(Payment payment) {
-	        if (payment.getBookingId() == null) return;
-	
-	        if ("SUCCESS".equalsIgnoreCase(payment.getStatus())) {
-	            bookingsRepository.updateStatus(payment.getBookingId(), "CONFIRMED");
-	        } else {
-	            bookingsRepository.updateStatus(payment.getBookingId(), "CANCELLED");
-	            Bookings booking = bookingsRepository.findById(payment.getBookingId());
-	            roomService.changeRoomStatus(booking.getRoomId(), "AVAILABLE");
-	        }
+	    public List<ManagerBookingViewDTO> getDetailedBookingsForBranch(int branchId) {
+	        // ✅ This is the missing method
+	        // Example: query DB for bookings with extra manager details
+	        // return managerBookingRepository.findDetailedByBranch(branchId);
+	        return null;
 	    }
+    @Override
+    public void updateBookingStatusBasedOnPayment(Payment payment) {
+        if (payment.getBookingId() == null) return;
+
+        if ("SUCCESS".equalsIgnoreCase(payment.getStatus())) {
+            bookingsRepository.updateStatus(payment.getBookingId(), "CONFIRMED");
+        } else {
+            // Cancel booking if payment fails
+            // Room becomes available automatically via date-based query
+            bookingsRepository.updateStatus(payment.getBookingId(), "CANCELLED");
+        }
+    }
 	}

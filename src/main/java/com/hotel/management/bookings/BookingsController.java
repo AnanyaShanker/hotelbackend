@@ -28,6 +28,11 @@ public class BookingsController {
         return ResponseEntity.ok(bookingsService.getAllBookings());
     }
 
+    @GetMapping("/branch/{branchId}/detailed")
+    public ResponseEntity<List<ManagerBookingViewDTO>> getDetailedBookingsForBranch(@PathVariable int branchId) {
+        List<ManagerBookingViewDTO> list = bookingsService.getDetailedBookingsForBranch(branchId);
+        return ResponseEntity.ok(list);
+    }
    
     @GetMapping("/{bookingId}")
     public ResponseEntity<Bookings> getBookingById(@PathVariable int bookingId) {

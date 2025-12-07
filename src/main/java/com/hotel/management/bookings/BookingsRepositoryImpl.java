@@ -69,6 +69,39 @@ public class BookingsRepositoryImpl implements BookingsRepository {
     }
 
     @Override
+    public List<ManagerBookingViewDTO> findDetailedByBranch(int branchId) {
+
+        String sql = """
+            SELECT 
+                b.booking_id,
+                u.name AS customer_name,
+                u.email AS customer_email,
+                r.room_id,
+                r.room_number,
+                b.check_in_date,
+                b.check_out_date,
+                b.booking_status
+            FROM bookings b
+            JOIN users u ON b.customer_id = u.user_id
+            JOIN rooms r ON b.room_id = r.room_id
+            WHERE b.branch_id = ?
+            ORDER BY b.check_in_date DESC
+        """;
+
+        return jdbcTemplate.query(sql, (rs, n) -> {
+            ManagerBookingViewDTO dto = new ManagerBookingViewDTO();
+            dto.setBookingId(rs.getInt("booking_id"));
+            dto.setCustomerName(rs.getString("customer_name"));
+            dto.setCustomerEmail(rs.getString("customer_email"));
+            dto.setRoomId(rs.getInt("room_id"));
+            dto.setRoomNumber(rs.getString("room_number"));
+            dto.setCheckInDate(rs.getTimestamp("check_in_date"));
+            dto.setCheckOutDate(rs.getTimestamp("check_out_date"));
+            dto.setBookingStatus(rs.getString("booking_status"));
+            return dto;
+        }, branchId);
+    }
+    @Override
     public List<Bookings> findByCustomer(int customerId) {
         String sql = "SELECT * FROM bookings WHERE customer_id = ? ORDER BY created_at DESC";
         return jdbcTemplate.query(sql, new BookingsRowMapper(), customerId);

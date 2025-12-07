@@ -45,6 +45,16 @@ public class BranchServiceImpl implements BranchService {
 
 		return convertToResponse(branch);
 	}
+	
+	@Override
+	public BranchResponseDTO getBranchByManager(Integer managerId) {
+
+	    Branch branch = branchRepository.findByManagerId(managerId)
+	            .orElseThrow(() -> new ResourceNotFoundException(
+	                    "No branch found for manager with ID " + managerId));
+
+	    return convertToResponse(branch);
+	}
 
 	
 	@Override

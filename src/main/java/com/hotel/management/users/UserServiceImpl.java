@@ -141,7 +141,19 @@ public class UserServiceImpl implements UserService {
 			throw new RuntimeException("Invalid credentials");
 		return UserMapper.toDTO(user);
 	}
- 
+
+	// ✅ NEW: Verify password without full login
+	@Override
+	public boolean verifyPassword(String email, String password) {
+		try {
+			User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+			String computed = Utils.generateHash(user.getPasswordSalt() + password);
+			return computed.equals(user.getPasswordHash());
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	@Override
 	public int toggleStatus(int userId) {
 		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));

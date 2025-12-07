@@ -53,6 +53,11 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public List<Room> getAvailableRoomsForDates(int branchId, int typeId, java.sql.Timestamp checkIn, java.sql.Timestamp checkOut) {
+        return roomRepository.findAvailableRoomsForDates(branchId, typeId, checkIn, checkOut);
+    }
+
+    @Override
     public Room updateRoom(Room room) {
         return roomRepository.update(room);
     }

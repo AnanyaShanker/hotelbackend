@@ -90,4 +90,12 @@ public class StaffServiceImpl implements StaffService {
         staffRepository.updateStatus(staffId, status);
         return getById(staffId);
     }
+
+    // Get staff by staff_identifier (e.g., ST-MUM-001)
+    @Override
+    public StaffDTO getStaffByStaffId(String staffIdentifier) {
+        Staff s = staffRepository.findByStaffIdentifier(staffIdentifier)
+                .orElseThrow(() -> new IllegalArgumentException("Staff not found with ID: " + staffIdentifier));
+        return StaffMapper.toDTO(s);
+    }
 }

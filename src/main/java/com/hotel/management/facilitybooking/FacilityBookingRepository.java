@@ -61,10 +61,10 @@ public class FacilityBookingRepository {
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rn) -> mapFull(rs), id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
-            System.err.println("❌ No facility booking found with ID: " + id);
+            System.err.println("No facility booking found with ID: " + id);
             return null;
         } catch (Exception e) {
-            System.err.println("❌ Error fetching facility booking details for ID " + id + ": " + e.getMessage());
+            System.err.println("Error fetching facility booking details for ID " + id + ": " + e.getMessage());
             e.printStackTrace();
             throw e;
         }

@@ -10,10 +10,10 @@ public class UserDTO {
     private String phone;
     private String password;
     private MultipartFile profileImage;
-    private MultipartFile idDocument;   // ✅ renamed
+    private MultipartFile idDocument;  
     private String notes;
     private String status;
-    private String securityQuestion;    // ✅ renamed
+    private String securityQuestion;    
     private String securityAnswer;
     
 

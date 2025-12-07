@@ -10,5 +10,6 @@ public interface BookingsRepository {
     List<Bookings> findByBranch(int branchId);
     List<Bookings> findByCustomer(int customerId);
     void updatePaymentStatus(int bookingId, String paymentStatus);
+    List<ManagerBookingViewDTO> findDetailedByBranch(int branchId);
     boolean existsByIdAndCustomerId(Integer bookingId, Integer customerId);
 }

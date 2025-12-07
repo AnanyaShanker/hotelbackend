@@ -36,7 +36,7 @@ public class RoomRepositoryImpl implements RoomRepository {
     
     @Override
 	public List<Room> findAllAvailable() {
-    	 return jdbcTemplate.query("SELECT * FROM rooms WHERE status != 'BLOCKED'", new RoomRowMapper());
+    	 return jdbcTemplate.query("SELECT * FROM rooms WHERE status != 'BLOCKED' and status != 'MAINTENANCE'", new RoomRowMapper());
 	}
 
     @Override
@@ -61,6 +61,35 @@ public class RoomRepositoryImpl implements RoomRepository {
     public List<Room> findAvailableRooms(int branchId, int typeId) {
         String sql = "SELECT * FROM rooms WHERE branch_id = ? AND type_id = ? AND status = 'AVAILABLE'";
         return jdbcTemplate.query(sql, new RoomRowMapper(), branchId, typeId);
+    }
+
+    @Override
+    public List<Room> findAvailableRoomsForDates(int branchId, int typeId, java.sql.Timestamp checkIn, java.sql.Timestamp checkOut) {
+        // Query to find rooms that are NOT booked during the requested date range
+        // Two date ranges overlap if: (start1 < end2) AND (end1 > start2)
+        // This is the standard interval overlap formula
+
+        String sql = "SELECT r.* FROM rooms r " +
+                     "WHERE r.branch_id = ? " +
+                     "AND r.type_id = ? " +
+                     "AND r.status != 'BLOCKED' " +  // Exclude blocked/deleted rooms
+                     "AND r.room_id NOT IN ( " +
+                     "    SELECT b.room_id FROM bookings b " +
+                     "    WHERE b.booking_status IN ('CONFIRMED', 'COMPLETED') " +  // Only active bookings
+                     "    AND b.check_in_date < ? " +  // Existing booking starts before new checkout
+                     "    AND b.check_out_date > ? " + // Existing booking ends after new checkin
+                     ")";
+
+        // The overlap logic:
+        // A room is unavailable if there's ANY booking where:
+        // - Booking check-in < Requested check-out (booking starts before we leave)
+        // - Booking check-out > Requested check-in (booking ends after we arrive)
+
+        return jdbcTemplate.query(sql, new RoomRowMapper(),
+            branchId, typeId,
+            checkOut,  // Parameter for: b.check_in_date < ?
+            checkIn    // Parameter for: b.check_out_date > ?
+        );
     }
 
     @Override

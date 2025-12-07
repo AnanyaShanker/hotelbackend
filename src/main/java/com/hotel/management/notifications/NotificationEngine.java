@@ -47,9 +47,15 @@ public class NotificationEngine {
 
         case PAYMENT_RECEIVED:
             templateFile = "payment_received_customer.html";
-            subject = "Payment Received - " + data.getOrDefault("bookingId", "");
+            subject = "Payment Confirmation - Booking #" + data.getOrDefault("bookingId", "");
+            model.put("customerName", user.getName()); // Add customer name for email template
             model.put("amount", data.getOrDefault("amount", ""));
             model.put("bookingId", data.getOrDefault("bookingId", ""));
+            model.put("transactionId", data.getOrDefault("transactionId", "N/A"));
+            model.put("paymentMethod", data.getOrDefault("paymentMethod", "Online"));
+            // Format current date for payment date
+            model.put("paymentDate", java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")));
             break;
 
         case STAFF_TASK_ASSIGNED:
@@ -72,6 +78,19 @@ public class NotificationEngine {
             subject = "Facility Booking Confirmed - " + data.getOrDefault("bookingId", "");
             model.put("bookingId", data.getOrDefault("bookingId", ""));
             model.put("facilityName", data.getOrDefault("facilityName", ""));
+            break;
+
+        case DAILY_SUMMARY:
+            templateFile = "manager_daily_summary.html";
+            subject = "Daily Manager Summary - " + data.getOrDefault("date", "");
+            model.put("date", data.getOrDefault("date", ""));
+            model.put("totalBookings", data.getOrDefault("totalBookings", "0"));
+            model.put("checkedIn", data.getOrDefault("checkedIn", "0"));
+            model.put("checkedOut", data.getOrDefault("checkedOut", "0"));
+            model.put("facilityBookings", data.getOrDefault("facilityBookings", "0"));
+            model.put("topFacility", data.getOrDefault("topFacility", "N/A"));
+            model.put("staffTasks", data.getOrDefault("staffTasks", "0"));
+            model.put("pendingMaintenance", data.getOrDefault("pendingMaintenance", "0"));
             break;
 
         default:

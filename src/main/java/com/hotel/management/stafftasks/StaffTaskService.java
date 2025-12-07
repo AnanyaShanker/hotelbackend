@@ -9,4 +9,7 @@ public interface StaffTaskService {
     List<StaffTaskDTO> getTasksByRoom(int roomId);
     List<StaffTaskDTO> getAllTasks();
     StaffTaskDTO updateStatus(int taskId, String status, String remarks);
+
+    // new
+    List<StaffTaskDTO> getTasksByHotel(int hotelId);
 }

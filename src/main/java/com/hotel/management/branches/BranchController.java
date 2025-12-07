@@ -30,6 +30,12 @@ public class BranchController {
 		return ResponseEntity.ok(dto);
 	}
 
+	@GetMapping("/manager/{managerId}")
+	public ResponseEntity<BranchResponseDTO> getBranchByManager(@PathVariable Integer managerId) {
+	    BranchResponseDTO dto = branchService.getBranchByManager(managerId);
+	    return ResponseEntity.ok(dto);
+	}
+
 	@GetMapping
 	public ResponseEntity<List<BranchResponseDTO>> getAllBranches() {
 

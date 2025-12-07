@@ -84,4 +84,12 @@ public class StaffRepositoryImpl implements StaffRepository {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, staffId);
         return count != null && count > 0;
     }
+
+    // Find staff by staff_identifier
+    @Override
+    public Optional<Staff> findByStaffIdentifier(String staffIdentifier) {
+        String sql = "SELECT * FROM staff WHERE staff_identifier = ?";
+        List<Staff> list = jdbcTemplate.query(sql, rowMapper, staffIdentifier);
+        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    }
 }

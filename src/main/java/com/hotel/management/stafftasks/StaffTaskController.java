@@ -12,12 +12,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/stafftasks")
 public class StaffTaskController {
-	@Autowired
-    private StaffTaskService taskService;
-	@Autowired
-    private StaffService staffService; 
 
-   
+    @Autowired
+    private StaffTaskService taskService;
+
+    @Autowired
+    private StaffService staffService;
 
     @PostMapping
     public ResponseEntity<StaffTaskDTO> createTask(@RequestBody StaffTaskDTO dto) {
@@ -30,25 +30,21 @@ public class StaffTaskController {
         return ResponseEntity.ok(taskService.getTask(taskId));
     }
 
-  
     @GetMapping("/staff/{staffId}")
     public ResponseEntity<List<StaffTaskDTO>> getTasksByStaff(@PathVariable int staffId) {
         return ResponseEntity.ok(taskService.getTasksByStaff(staffId));
     }
 
-   
     @GetMapping("/room/{roomId}")
     public ResponseEntity<List<StaffTaskDTO>> getTasksByRoom(@PathVariable int roomId) {
         return ResponseEntity.ok(taskService.getTasksByRoom(roomId));
     }
 
-    
     @GetMapping
     public ResponseEntity<List<StaffTaskDTO>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
-    
     @PatchMapping("/{taskId}/status")
     public ResponseEntity<StaffTaskDTO> updateStatus(
             @PathVariable int taskId,
@@ -58,20 +54,18 @@ public class StaffTaskController {
         return ResponseEntity.ok(updated);
     }
 
-    
+    // Existing endpoint for getting staff by hotel (returns staff list)
     @GetMapping("/hotel/{hotelId}/staff")
     public ResponseEntity<List<StaffDTO>> getStaffByHotel(@PathVariable int hotelId) {
         List<StaffDTO> staffList = staffService.list(hotelId, null); // filter by hotelId
         return ResponseEntity.ok(staffList);
     }
 
-  
     @PostMapping("/hotel/{hotelId}/assign")
     public ResponseEntity<StaffTaskDTO> assignTaskToStaff(
             @PathVariable int hotelId,
             @RequestBody StaffTaskDTO dto) {
 
-       
         StaffDTO staff = staffService.getById(dto.getStaffId());
         if (staff.getHotelId() == null || !staff.getHotelId().equals(hotelId)) {
             throw new IllegalArgumentException("Staff does not belong to this hotel");
@@ -79,5 +73,12 @@ public class StaffTaskController {
 
         StaffTaskDTO created = taskService.createTask(dto);
         return ResponseEntity.status(201).body(created);
+    }
+
+    // NEW: return tasks for a hotel (manager view). Frontend route: GET /api/stafftasks/hotel/{hotelId}/tasks
+    @GetMapping("/hotel/{hotelId}/tasks")
+    public ResponseEntity<List<StaffTaskDTO>> getTasksForHotel(@PathVariable int hotelId) {
+        List<StaffTaskDTO> list = taskService.getTasksByHotel(hotelId);
+        return ResponseEntity.ok(list);
     }
 }

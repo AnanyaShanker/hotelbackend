@@ -16,6 +16,9 @@ public interface UserService {
     // Authentication
     UserDTO login(String email, String password);
 
+    // Verify password without full login
+    boolean verifyPassword(String email, String password);
+
     // Status management
     int toggleStatus(int userId);
 

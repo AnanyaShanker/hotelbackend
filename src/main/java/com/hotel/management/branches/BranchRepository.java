@@ -5,15 +5,17 @@ import java.util.Optional;
 
 public interface BranchRepository {
 
-	Integer addBranch(Branch branch);
+    Integer addBranch(Branch branch);
 
-	Optional<Branch> findById(Integer id);
+    Optional<Branch> findById(Integer id);
 
-	List<Branch> findAll();
+    Optional<Branch> findByManagerId(Integer managerId);  // ⭐ NEW
 
-	List<Branch> findByLocation(String location);
+    List<Branch> findAll();
 
-	void update(Branch branch);
+    List<Branch> findByLocation(String location);
 
-	void toggleStatus(Integer id);
+    void update(Branch branch);
+
+    void toggleStatus(Integer id);
 }
