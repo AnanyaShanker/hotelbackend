@@ -35,9 +35,20 @@ public class FacilityBookingController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable int id) {
         try {
+            System.out.println(" Fetching basic facility booking for ID: " + id);
             FacilityBooking b = bookingService.getBookingById(id);
+            if (b == null) {
+                System.err.println(" Facility booking not found with ID: " + id);
+                return ResponseEntity.status(404).body("Booking not found with ID: " + id);
+            }
+            System.out.println(" Successfully fetched basic facility booking for ID: " + id);
             return ResponseEntity.ok(b);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            System.err.println(" EmptyResultDataAccessException for booking ID: " + id);
+            return ResponseEntity.status(404).body("Booking not found with ID: " + id);
         } catch (Exception e) {
+            System.err.println(" Exception fetching booking for ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(404).body("Booking not found");
         }
     }
@@ -45,10 +56,21 @@ public class FacilityBookingController {
     @GetMapping("/{id}/details")
     public ResponseEntity<?> getFullById(@PathVariable int id) {
         try {
+            System.out.println(" Fetching facility booking details for ID: " + id);
             FacilityBookingFullDTO dto = bookingService.getFullBookingById(id);
+            if (dto == null) {
+                System.err.println(" Facility booking not found with ID: " + id);
+                return ResponseEntity.status(404).body("Booking not found with ID: " + id);
+            }
+            System.out.println(" Successfully fetched facility booking details for ID: " + id);
             return ResponseEntity.ok(dto);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            System.err.println(" EmptyResultDataAccessException for booking ID: " + id);
+            return ResponseEntity.status(404).body("Booking not found with ID: " + id);
         } catch (Exception e) {
-            return ResponseEntity.status(404).body("Booking not found");
+            System.err.println(" Exception fetching booking details for ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error fetching booking details: " + e.getMessage());
         }
     }
 
@@ -76,10 +98,29 @@ public class FacilityBookingController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<?> cancel(@PathVariable int id, @RequestParam(required = false) Integer requestedBy) {
         try {
-            boolean ok = bookingService.cancelBooking(id, requestedBy == null ? -1 : requestedBy);
-            return ResponseEntity.ok(ok ? "Cancelled" : "Cancel failed");
+            boolean success = bookingService.cancelBooking(id, requestedBy == null ? -1 : requestedBy);
+            return ResponseEntity.ok(java.util.Map.of(
+                "success", success,
+                "message", success ? "Booking cancelled successfully" : "Failed to cancel booking"
+            ));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Cancel failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(java.util.Map.of("error", "Cancel failed: " + e.getMessage()));
+        }
+    }
+
+    // 4. PATCH /facility-bookings/{id}/payment-status
+    @PatchMapping("/{id}/payment-status")
+    public ResponseEntity<String> updatePaymentStatus(
+            @PathVariable int id,
+            @RequestBody java.util.Map<String, String> body) {
+        try {
+            String status = body.get("paymentStatus");
+            bookingService.updatePaymentStatus(id, status);
+            return ResponseEntity.ok("Payment status updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Update failed: " + e.getMessage());
         }
     }
 }

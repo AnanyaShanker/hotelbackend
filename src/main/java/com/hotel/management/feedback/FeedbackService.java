@@ -4,19 +4,22 @@ import java.util.List;
 
 public interface FeedbackService {
 
-	FeedbackDto addFeedback(FeedbackDto dto);
+    FeedbackDto createFeedback(FeedbackDto dto);
 
-	FeedbackDto getFeedbackById(Integer feedbackId);
+    FeedbackDto getById(Integer id);
 
-	List<FeedbackDto> getAllFeedback();
+    List<FeedbackDto> getAll();
 
-	List<FeedbackDto> getFeedbackByCustomer(Integer customerId);
+    List<FeedbackDto> getByCustomer(Integer customerId);
 
-	List<FeedbackDto> getFeedbackByBooking(Integer bookingId);
+    List<FeedbackDto> getByBooking(Integer bookingId);
 
-	List<FeedbackDto> getFeedbackByFacilityBooking(Integer facilityBookingId);
+    List<FeedbackDto> getByFacilityBooking(Integer facilityBookingId);
 
-	FeedbackDto updateFeedback(Integer feedbackId, FeedbackDto dto);
+    FeedbackDto update(Integer id, FeedbackDto dto);
 
-	void deleteFeedback(Integer feedbackId);
+    void delete(Integer id);
+
+    // Admin table
+    List<FeedbackDisplayDto> getAdminDisplayList();
 }

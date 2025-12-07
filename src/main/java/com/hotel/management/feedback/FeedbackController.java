@@ -1,63 +1,70 @@
 package com.hotel.management.feedback;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/feedback")
 public class FeedbackController {
 
-	@Autowired
-	private FeedbackService feedbackService;
+    private final FeedbackService feedbackService;
 
-	// CREATE
-	@PostMapping
-	public FeedbackDto addFeedback(@RequestBody FeedbackDto dto) {
-		return feedbackService.addFeedback(dto);
-	}
+    public FeedbackController(FeedbackService feedbackService) {
+        this.feedbackService = feedbackService;
+    }
 
-	// GET ALL
-	@GetMapping
-	public List<FeedbackDto> getAllFeedback() {
-		return feedbackService.getAllFeedback();
-	}
+    // ---------------- Basic CRUD ----------------
 
-	// GET BY ID
-	@GetMapping("/{id}")
-	public FeedbackDto getFeedbackById(@PathVariable Integer id) {
-		return feedbackService.getFeedbackById(id);
-	}
+    @PostMapping
+    public ResponseEntity<FeedbackDto> create(@RequestBody FeedbackDto dto) {
+        FeedbackDto created = feedbackService.createFeedback(dto);
+        return ResponseEntity.ok(created);
+    }
 
-	// GET BY CUSTOMER
-	@GetMapping("/customer/{customerId}")
-	public List<FeedbackDto> getFeedbackByCustomer(@PathVariable Integer customerId) {
-		return feedbackService.getFeedbackByCustomer(customerId);
-	}
+    @GetMapping("/{id}")
+    public ResponseEntity<FeedbackDto> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(feedbackService.getById(id));
+    }
 
-	// GET BY BOOKING
-	@GetMapping("/booking/{bookingId}")
-	public List<FeedbackDto> getFeedbackByBooking(@PathVariable Integer bookingId) {
-		return feedbackService.getFeedbackByBooking(bookingId);
-	}
+    @GetMapping
+    public ResponseEntity<List<FeedbackDto>> getAll() {
+        return ResponseEntity.ok(feedbackService.getAll());
+    }
 
-	// GET BY FACILITY BOOKING
-	@GetMapping("/facility/{facilityBookingId}")
-	public List<FeedbackDto> getFeedbackByFacilityBooking(@PathVariable Integer facilityBookingId) {
-		return feedbackService.getFeedbackByFacilityBooking(facilityBookingId);
-	}
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<FeedbackDto>> getByCustomer(@PathVariable Integer customerId) {
+        return ResponseEntity.ok(feedbackService.getByCustomer(customerId));
+    }
 
-	// UPDATE
-	@PutMapping("/{id}")
-	public FeedbackDto updateFeedback(@PathVariable Integer id, @RequestBody FeedbackDto dto) {
-		return feedbackService.updateFeedback(id, dto);
-	}
+    @GetMapping("/booking/{bookingId}")
+    public ResponseEntity<List<FeedbackDto>> getByBooking(@PathVariable Integer bookingId) {
+        return ResponseEntity.ok(feedbackService.getByBooking(bookingId));
+    }
 
-	// DELETE
-	@DeleteMapping("/{id}")
-	public String deleteFeedback(@PathVariable Integer id) {
-		feedbackService.deleteFeedback(id);
-		return "Feedback deleted successfully.";
-	}
+    @GetMapping("/facility/{facilityBookingId}")
+    public ResponseEntity<List<FeedbackDto>> getByFacility(@PathVariable Integer facilityBookingId) {
+        return ResponseEntity.ok(feedbackService.getByFacilityBooking(facilityBookingId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FeedbackDto> update(@PathVariable Integer id,
+                                              @RequestBody FeedbackDto dto) {
+        return ResponseEntity.ok(feedbackService.update(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        feedbackService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ---------------- Admin dashboard list ----------------
+    // RETURNS: feedbackId, customerName, itemName, rating, comments
+    @GetMapping("/admin/list")
+    public ResponseEntity<List<FeedbackDisplayDto>> getAdminList() {
+        return ResponseEntity.ok(feedbackService.getAdminDisplayList());
+    }
 }

@@ -72,7 +72,7 @@ public class RoomRepositoryImpl implements RoomRepository {
         String sql = "SELECT r.* FROM rooms r " +
                      "WHERE r.branch_id = ? " +
                      "AND r.type_id = ? " +
-                     "AND r.status != 'BLOCKED' " +  // Exclude blocked/deleted rooms
+                     "AND r.status != 'OCCUPIED' " +  // Exclude blocked/deleted rooms
                      "AND r.room_id NOT IN ( " +
                      "    SELECT b.room_id FROM bookings b " +
                      "    WHERE b.booking_status IN ('CONFIRMED', 'COMPLETED') " +  // Only active bookings

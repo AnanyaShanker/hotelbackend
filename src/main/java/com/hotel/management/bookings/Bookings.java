@@ -102,5 +102,5 @@ public class Bookings {
 		this.updatedAt = updatedAt;
 	}
 
-    // Getters and Setters
+   
 }

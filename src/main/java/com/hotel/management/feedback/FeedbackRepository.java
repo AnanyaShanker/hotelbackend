@@ -1,26 +1,26 @@
 package com.hotel.management.feedback;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FeedbackRepository {
 
-	// Create
-	void addFeedback(Feedback feedback);
+    Integer addFeedback(Feedback feedback);
 
-	// Read
-	Feedback getFeedbackById(Integer feedbackId);
+    Optional<Feedback> getById(Integer id);
 
-	List<Feedback> getAllFeedback();
+    List<Feedback> getAll();
 
-	List<Feedback> getFeedbackByCustomer(Integer customerId);
+    void updateFeedback(Integer id, Feedback feedback);
 
-	List<Feedback> getFeedbackByBooking(Integer bookingId);
+    void deleteFeedback(Integer id);
 
-	List<Feedback> getFeedbackByFacilityBooking(Integer facilityBookingId);
+    List<Feedback> getByCustomer(Integer customerId);
 
-	// Update
-	void updateFeedback(Integer feedbackId, Feedback feedback);
+    List<Feedback> getByBooking(Integer bookingId);
 
-	// Delete
-	void deleteFeedback(Integer feedbackId);
+    List<Feedback> getByFacilityBooking(Integer facilityBookingId);
+
+    // Admin table
+    List<FeedbackDisplayDto> getAdminDisplayList();
 }

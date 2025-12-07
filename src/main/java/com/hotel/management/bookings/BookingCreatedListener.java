@@ -35,7 +35,7 @@ public class BookingCreatedListener {
 
         Bookings booking = event.getBooking();
 
-        // 1. Create pending payment record automatically
+       
         Payment payment = new Payment();
         payment.setBookingId(booking.getBookingId());
         payment.setCustomerId(booking.getCustomerId());
@@ -45,13 +45,13 @@ public class BookingCreatedListener {
         payment.setTransactionId("TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         payment.setNotes("Auto-created for room booking #" + booking.getBookingId());
 
-        // Insert and get back with generated ID
+        
         payment = paymentRepository.createPaymentAndReturnWithId(payment);
 
-        // 2. Fetch room details for notification
+        
         var room = roomService.getRoomById(booking.getRoomId());
 
-        // 3. Send booking confirmation notification
+        
         notificationService.sendNotification(
                 booking.getCustomerId(),
                 NotificationType.BOOKING_CONFIRMATION,
@@ -65,7 +65,7 @@ public class BookingCreatedListener {
                 )
         );
 
-        // 4. Send payment pending notification
+        
         notificationService.sendNotification(
                 booking.getCustomerId(),
                 NotificationType.PAYMENT_PENDING,

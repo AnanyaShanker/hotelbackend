@@ -36,7 +36,7 @@ public class JwtUtil {
 
 	}
 
-	// --------------------- GENERATE TOKEN ---------------------
+	
 
 	public String generateToken(int userId, int roleId) {
 
@@ -46,13 +46,13 @@ public class JwtUtil {
 
 		return Jwts.builder().subject(String.valueOf(userId)).issuedAt(now).expiration(expiry)
 
-				.claims(Map.of("userId", userId, "roleId", roleId)).signWith(key) // ⬅ NEW syntax
+				.claims(Map.of("userId", userId, "roleId", roleId)).signWith(key) 
 
 				.compact();
 
 	}
 
-	// --------------------- VALIDATE TOKEN ---------------------
+	
 
 	@SuppressWarnings("deprecation")
 
@@ -60,7 +60,7 @@ public class JwtUtil {
 
 		try {
 
-			Jwts.parser().setSigningKey(key) // ⬅ NEW syntax
+			Jwts.parser().setSigningKey(key) 
 
 					.build().parseSignedClaims(token);
 
@@ -74,7 +74,7 @@ public class JwtUtil {
 
 	}
 
-	// --------------------- GET CLAIMS ---------------------
+	
 
 	public Claims getClaims(String token) {
 
@@ -84,7 +84,7 @@ public class JwtUtil {
 
 	}
 
-	// --------------------- GET USER ID ---------------------
+	
 
 	public Integer getUserId(String token) {
 
@@ -94,7 +94,7 @@ public class JwtUtil {
 
 	}
 
-	// --------------------- GET ROLE ID ---------------------
+	
 
 	public Integer getRoleId(String token) {
 

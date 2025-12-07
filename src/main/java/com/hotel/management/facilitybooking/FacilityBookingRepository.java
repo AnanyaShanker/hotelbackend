@@ -56,15 +56,15 @@ public class FacilityBookingRepository {
                 "LEFT JOIN users u ON u.user_id = fb.customer_id " +
                 "LEFT JOIN facilities f ON f.facility_id = fb.facility_id " +
                 "LEFT JOIN payments p ON p.facility_booking_id = fb.facility_booking_id " +
-                "AND p.payment_id = (SELECT MAX(payment_id) FROM payments WHERE facility_booking_id = fb.facility_booking_id) " +
-                "WHERE fb.facility_booking_id = ?";
+                "WHERE fb.facility_booking_id = ? " +
+                "AND p.payment_id = (SELECT MAX(payment_id) FROM payments WHERE facility_booking_id = fb.facility_booking_id)";
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rn) -> mapFull(rs), id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
-            System.err.println("No facility booking found with ID: " + id);
+            System.err.println("❌ No facility booking found with ID: " + id);
             return null;
         } catch (Exception e) {
-            System.err.println("Error fetching facility booking details for ID " + id + ": " + e.getMessage());
+            System.err.println("❌ Error fetching facility booking details for ID " + id + ": " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -114,6 +114,16 @@ public class FacilityBookingRepository {
         String sql = "SELECT COUNT(1) FROM facility_bookings WHERE facility_booking_id = ? AND customer_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, facilityBookingId, customerId);
         return count != null && count > 0;
+    }
+
+ 
+    public int countActiveBookingsByCustomer(int customerId) {
+        String sql = "SELECT COUNT(*) FROM facility_bookings " +
+                     "WHERE customer_id = ? " +
+                     "AND booking_status IN ('CONFIRMED', 'PENDING') " +
+                     "AND booking_date >= CURDATE()";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, customerId);
+        return count != null ? count : 0;
     }
 
 

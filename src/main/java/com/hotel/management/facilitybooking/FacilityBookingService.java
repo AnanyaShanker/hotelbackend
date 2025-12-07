@@ -21,23 +21,21 @@ public class FacilityBookingService {
     private final FacilityRepositoryImpl facilityRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
-    private final ApplicationEventPublisher applicationEventPublisher; // ⬅️ ADDED
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public FacilityBookingService(FacilityBookingRepository bookingRepository,
                                   FacilityRepositoryImpl facilityRepository,
                                   UserRepository userRepository,
                                   EmailService emailService,
-                                  ApplicationEventPublisher applicationEventPublisher) { // ⬅️ ADDED
+                                  ApplicationEventPublisher applicationEventPublisher) { 
         this.bookingRepository = bookingRepository;
         this.facilityRepository = facilityRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
-        this.applicationEventPublisher = applicationEventPublisher; // ⬅️ ADDED
+        this.applicationEventPublisher = applicationEventPublisher; 
     }
 
-    /**
-     * Create a booking with DB row locking (FOR UPDATE).
-     */
+   
     @Transactional(rollbackFor = Exception.class)
     public FacilityBooking createBooking(FacilityBookingRequest req) {
         // Basic validation
@@ -68,14 +66,26 @@ public class FacilityBookingService {
             if (!end.isAfter(start)) {
                 throw new IllegalArgumentException("endTime must be after startTime");
             }
+
+            
+            FacilityBookingRules.validateOperatingHours(start, end);
+
+            
+            FacilityBookingRules.validateDuration(start, end);
+
+            
+            FacilityBookingRules.validateAdvanceBooking(bookingDate, start);
+        } else {
+           
+            FacilityBookingRules.validateAdvanceBooking(bookingDate, LocalTime.of(9, 0));
         }
 
-        // 1) Verify user exists & active
+        
         if (!userRepository.existsByIdAndActive(req.getCustomerId())) {
             throw new IllegalArgumentException("Customer not found or not active: " + req.getCustomerId());
         }
 
-        // 2) Verify facility exists and available
+        
         Facility facility = facilityRepository.findById(req.getFacilityId());
         if (facility == null)
             throw new IllegalArgumentException("Facility not found: " + req.getFacilityId());
@@ -86,19 +96,33 @@ public class FacilityBookingService {
             throw new IllegalStateException("Facility is not available for booking");
         }
 
-        // 3) Lock existing rows for this facility+date (FOR UPDATE)
+       
+        if (start != null && end != null) {
+            FacilityBookingRules.validateAllowedSlots(facility.getType(), start, end);
+        }
+
+        
+        int activeBookings = bookingRepository.countActiveBookingsByCustomer(req.getCustomerId());
+        FacilityBookingRules.validateCustomerBookingLimits(activeBookings);
+
+        
         List<FacilityBooking> existingLocked =
                 bookingRepository.findByFacilityAndDateForUpdate(facility.getFacilityId(), bookingDate);
 
-        // 4) Check availability
-        if (!isAvailable(existingLocked, start, end, req.getQuantity(), facility.getCapacity())) {
-            throw new IllegalStateException("Facility not available for requested date/time or capacity exceeded");
+        
+        int bufferMinutes = FacilityBookingRules.getBufferMinutes(facility.getType());
+        if (!isAvailableWithBuffer(existingLocked, start, end, req.getQuantity(),
+                                    facility.getCapacity(), bufferMinutes)) {
+            throw new IllegalStateException(
+                String.format("Facility not available for requested date/time (includes %d min buffer time for cleaning)",
+                    bufferMinutes)
+            );
         }
 
-        // 5) Price calculation
+        
         double totalPrice = calculatePrice(facility.getPrice(), start, end, req.getQuantity());
 
-        // 6) Build booking object
+        
         FacilityBooking booking = new FacilityBooking();
         booking.setCustomerId(req.getCustomerId());
         booking.setFacilityId(req.getFacilityId());
@@ -111,54 +135,80 @@ public class FacilityBookingService {
         booking.setBookingStatus("CONFIRMED");
         booking.setNotes(req.getNotes());
 
-        // 7) Save and get ID
+        
         int newId = bookingRepository.saveAndReturnId(booking);
 
-        // 8) Fetch complete booking
+       
         FacilityBooking saved = bookingRepository.findById(newId);
         
         applicationEventPublisher.publishEvent(new FacilityBookedEvent(saved));
 
-        // 9) Send booking confirmation email ⬅️ ADDED
-//        try {
-//            String customerEmail = userRepository.getEmailById(saved.getCustomerId());
-//            String html = facilityBookingTemplate(saved);
-//            emailService.sendHtmlEmail(customerEmail, "Facility Booking Confirmation", html);
-//        } catch (Exception emailEx) {
-//            // DO NOT rollback booking if email fails
-//            emailEx.printStackTrace();
-//        }
+  
 
         return saved;
     }
 
-    // ---------------------------
-    // Availability logic
-    // ---------------------------
-    private boolean isAvailable(List<FacilityBooking> existing,
-                                LocalTime start,
-                                LocalTime end,
-                                int requestedQuantity,
-                                int facilityCapacity) {
+    
+    /**
+     * Check availability considering buffer time between bookings for cleaning
+     * Skips cancelled bookings from capacity calculation
+     *
+     * @param existing List of existing bookings for the facility/date
+     * @param start Requested start time (null for full-day)
+     * @param end Requested end time (null for full-day)
+     * @param requestedQuantity Number of guests
+     * @param facilityCapacity Maximum capacity of facility
+     * @param bufferMinutes Cleanup time between bookings
+     * @return true if available, false otherwise
+     */
+    private boolean isAvailableWithBuffer(List<FacilityBooking> existing,
+                                          LocalTime start,
+                                          LocalTime end,
+                                          int requestedQuantity,
+                                          int facilityCapacity,
+                                          int bufferMinutes) {
         if (existing == null || existing.isEmpty()) {
             return requestedQuantity <= facilityCapacity;
         }
 
         if (start == null || end == null) {
-            int sum = existing.stream().mapToInt(FacilityBooking::getQuantity).sum();
+            
+            int sum = existing.stream()
+                .filter(b -> !"CANCELLED".equals(b.getBookingStatus()))
+                .mapToInt(FacilityBooking::getQuantity)
+                .sum();
             return (sum + requestedQuantity) <= facilityCapacity;
         } else {
+            
             int overlapSum = 0;
+
             for (FacilityBooking b : existing) {
+                
+                if ("CANCELLED".equals(b.getBookingStatus())) {
+                    continue;
+                }
+
                 if (b.getStartTime() == null || b.getEndTime() == null) {
+                    
                     overlapSum += b.getQuantity();
                     continue;
                 }
-                LocalTime s = LocalTime.parse(b.getStartTime());
-                LocalTime e = LocalTime.parse(b.getEndTime());
-                boolean overlap = start.isBefore(e) && end.isAfter(s);
-                if (overlap) overlapSum += b.getQuantity();
+
+                LocalTime existingStart = LocalTime.parse(b.getStartTime());
+                LocalTime existingEnd = LocalTime.parse(b.getEndTime());
+
+                
+                LocalTime bufferedStart = existingStart.minusMinutes(bufferMinutes);
+                LocalTime bufferedEnd = existingEnd.plusMinutes(bufferMinutes);
+
+                
+                boolean overlap = start.isBefore(bufferedEnd) && end.isAfter(bufferedStart);
+
+                if (overlap) {
+                    overlapSum += b.getQuantity();
+                }
             }
+
             return (overlapSum + requestedQuantity) <= facilityCapacity;
         }
     }
@@ -181,7 +231,31 @@ public class FacilityBookingService {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean cancelBooking(int bookingId, int requestedByUserId) {
+        FacilityBooking booking = bookingRepository.findById(bookingId);
+
+        if (booking == null) {
+            throw new IllegalArgumentException("Booking not found with ID: " + bookingId);
+        }
+
+        if (booking.getCustomerId() != requestedByUserId) {
+            throw new IllegalArgumentException("You can only cancel your own bookings");
+        }
+
+        if ("CANCELLED".equals(booking.getBookingStatus())) {
+            throw new IllegalStateException("Booking is already cancelled");
+        }
+
+        if ("COMPLETED".equals(booking.getBookingStatus())) {
+            throw new IllegalStateException("Cannot cancel completed booking");
+        }
+
+       
         return bookingRepository.updateStatus(bookingId, "CANCELLED");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePaymentStatus(int bookingId, String paymentStatus) {
+        bookingRepository.updatePaymentStatus(bookingId, paymentStatus);
     }
 
     public double calculatePrice(double facilityPrice, LocalTime start, LocalTime end, int quantity) {
@@ -198,9 +272,7 @@ public class FacilityBookingService {
         return Math.round(v * 100.0) / 100.0;
     }
 
-    // ---------------------------
-    // Email Template (simple demo)
-    // ---------------------------
+   
     private String facilityBookingTemplate(FacilityBooking b) {
         return String.format("""
                 <h2>Your Facility Booking is Confirmed</h2>

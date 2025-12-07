@@ -23,7 +23,7 @@ package com.hotel.management.bookings;
 	@Override
 	public Bookings createBooking(Bookings booking, int branchId, int typeId) {
 
-	    //  VALIDATION: Check dates are valid
+	    
 	    if (booking.getCheckInDate() == null || booking.getCheckOutDate() == null) {
 	        throw new IllegalArgumentException("Check-in and check-out dates are required");
 	    }
@@ -33,13 +33,13 @@ package com.hotel.management.bookings;
 	        throw new IllegalArgumentException("Check-out date must be after check-in date");
 	    }
 
-	    // Prevent booking in the past
+	    
 	    Timestamp now = new Timestamp(System.currentTimeMillis());
 	    if (booking.getCheckInDate().before(now)) {
 	        throw new IllegalArgumentException("Cannot book rooms in the past");
 	    }
 
-	    //  Check room availability for the specific date range (prevents double-booking)
+	    
 	    List<Room> availableRooms = roomService.getAvailableRoomsForDates(
 	        branchId,
 	        typeId,
@@ -62,17 +62,16 @@ package com.hotel.management.bookings;
 		    booking.setBranchId(branchId);
 		    booking.setBookingStatus("CONFIRMED");
 
-		    // Calculate total price based on days and price per night
+		    
 		    long totalDays = calculateDays(booking.getCheckInDate(), booking.getCheckOutDate());
 		    booking.setTotalPrice(room.getPricePerNight() * totalDays);
 
 		    Bookings saved = bookingsRepository.save(booking);
 
-		    // Fetch complete booking with generated ID
+		    
 		    Bookings complete = bookingsRepository.findById(saved.getBookingId());
 
-		    // NOTE: Room status remains "AVAILABLE" - the booking record blocks the dates
-		    // This allows the same room to be booked for different, non-overlapping date ranges
+		    
 
 		    eventPublisher.publishEvent(new BookingCreatedEvent(complete));
 
@@ -142,24 +141,18 @@ package com.hotel.management.bookings;
 
     @Override
     public void cancelBooking(int bookingId) {
-	        // Simply update booking status to CANCELLED
-	        // No need to change room status - date-based availability handles this
+	        
 	        bookingsRepository.updateStatus(bookingId, "CANCELLED");
 	    }
 	
 	    @Override
 	    public void completeBooking(int bookingId) {
-	        // Simply update booking status to COMPLETED
-	        // No need to change room status - date-based availability handles this
+	        
 	        bookingsRepository.updateStatus(bookingId, "COMPLETED");
 	    }
-	    @Override
-	    public List<ManagerBookingViewDTO> getDetailedBookingsForBranch(int branchId) {
-	        // ✅ This is the missing method
-	        // Example: query DB for bookings with extra manager details
-	        // return managerBookingRepository.findDetailedByBranch(branchId);
-	        return null;
-	    }
+	   
+	    
+	    
     @Override
     public void updateBookingStatusBasedOnPayment(Payment payment) {
         if (payment.getBookingId() == null) return;
@@ -167,9 +160,16 @@ package com.hotel.management.bookings;
         if ("SUCCESS".equalsIgnoreCase(payment.getStatus())) {
             bookingsRepository.updateStatus(payment.getBookingId(), "CONFIRMED");
         } else {
-            // Cancel booking if payment fails
-            // Room becomes available automatically via date-based query
+            
             bookingsRepository.updateStatus(payment.getBookingId(), "CANCELLED");
         }
     }
+
+	@Override
+	public List<ManagerBookingViewDTO> getDetailedBookingsForBranch(int branchId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 	}

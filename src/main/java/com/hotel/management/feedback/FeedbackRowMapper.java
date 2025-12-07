@@ -8,30 +8,24 @@ import java.time.LocalDateTime;
 
 public class FeedbackRowMapper implements RowMapper<Feedback> {
 
-	@Override
-	public Feedback mapRow(ResultSet rs, int rowNum) throws SQLException {
+    @Override
+    public Feedback mapRow(ResultSet rs, int rowNum) throws SQLException {
+        Feedback f = new Feedback();
+        f.setFeedbackId(rs.getInt("feedback_id"));
+        f.setCustomerId(rs.getInt("customer_id"));
 
-		Feedback feedback = new Feedback();
+        Object bookingObj = rs.getObject("booking_id");
+        f.setBookingId(bookingObj != null ? (Integer) bookingObj : null);
 
-		feedback.setFeedbackId(rs.getInt("feedback_id"));
-		feedback.setCustomerId(rs.getInt("customer_id"));
+        Object fbObj = rs.getObject("facility_booking_id");
+        f.setFacilityBookingId(fbObj != null ? (Integer) fbObj : null);
 
-		// Nullable values
-		Object bookingIdObj = rs.getObject("booking_id");
-		feedback.setBookingId(bookingIdObj != null ? (Integer) bookingIdObj : null);
+        f.setRating(rs.getInt("rating"));
+        f.setComments(rs.getString("comments"));
 
-		Object facilityBookingIdObj = rs.getObject("facility_booking_id");
-		feedback.setFacilityBookingId(facilityBookingIdObj != null ? (Integer) facilityBookingIdObj : null);
-
-		feedback.setRating(rs.getInt("rating"));
-		feedback.setComments(rs.getString("comments"));
-		feedback.setFeedbackImage(rs.getString("feedback_image"));
-
-		// Convert SQL timestamp to LocalDateTime
-		if (rs.getTimestamp("submission_date") != null) {
-			feedback.setSubmissionDate(rs.getTimestamp("submission_date").toLocalDateTime());
-		}
-
-		return feedback;
-	}
+        if (rs.getTimestamp("submission_date") != null) {
+            f.setSubmissionDate(rs.getTimestamp("submission_date").toLocalDateTime());
+        }
+        return f;
+    }
 }

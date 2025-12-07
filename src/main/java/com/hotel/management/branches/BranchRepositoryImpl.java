@@ -80,7 +80,7 @@ public class BranchRepositoryImpl implements BranchRepository {
 	@Override
 	public void update(Branch branch) {
 		jdbcTemplate.update(
-				"UPDATE hotel_branches SET name=?, location=?, contact_number=?, manager_id=?, total_rooms=?, status=?, updated_at=NOW() WHERE branch_id=?",
+				"UPDATE hotel_branches SET name=?, location=?, contact_number=?, manager_id=?, total_rooms=?, status=? WHERE branch_id=?",
 				branch.getName(), branch.getLocation(), branch.getContactNumber(), branch.getManagerId(),
 				branch.getTotalRooms(), branch.getStatus(), branch.getBranchId());
 	}

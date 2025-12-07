@@ -12,7 +12,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rooms")
-public class RoomController {
+
+
+public class RoomController 
+
+{
 
     @Autowired
     private RoomService roomService;

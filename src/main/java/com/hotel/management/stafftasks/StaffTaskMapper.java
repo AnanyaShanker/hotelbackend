@@ -1,7 +1,7 @@
 package com.hotel.management.stafftasks;
-
+ 
 public class StaffTaskMapper {
-
+ 
     public static StaffTaskDTO toDTO(StaffTask t) {
         if (t == null) return null;
         StaffTaskDTO dto = new StaffTaskDTO();
@@ -13,12 +13,12 @@ public class StaffTaskMapper {
         dto.setRemarks(t.getRemarks());
         dto.setAssignedAt(t.getAssignedAt());
         dto.setCompletedAt(t.getCompletedAt());
-
+ 
         // Enriched
         dto.setStaffName(t.getStaffName());
         dto.setStaffUserId(t.getStaffUserId());
         dto.setRoomNumber(t.getRoomNumber());
-
+ 
         return dto;
     }
         public static StaffTask toEntity(StaffTaskDTO dto) {

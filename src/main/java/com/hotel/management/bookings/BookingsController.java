@@ -45,14 +45,14 @@ public class BookingsController {
         return ResponseEntity.ok(bookingsService.getBookingsByBranch(branchId));
     }
 
-    // 1. GET /api/bookings/customer/{customerId}
+   
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<Bookings>> getBookingsByCustomer(@PathVariable int customerId) {
         List<Bookings> bookings = bookingsService.getBookingsByCustomer(customerId);
         return ResponseEntity.ok(bookings);
     }
 
-    // 2. PATCH /api/bookings/{id}/payment-status
+    
     @PatchMapping("/{bookingId}/payment-status")
     public ResponseEntity<String> updatePaymentStatus(
             @PathVariable int bookingId,
@@ -62,7 +62,7 @@ public class BookingsController {
         return ResponseEntity.ok("Payment status updated successfully");
     }
 
-    // 3. GET /api/bookings/{id}/details
+    
     @GetMapping("/{bookingId}/details")
     public ResponseEntity<BookingsDTO> getBookingDetails(@PathVariable int bookingId) {
         BookingsDTO details = bookingsService.getBookingDetails(bookingId);

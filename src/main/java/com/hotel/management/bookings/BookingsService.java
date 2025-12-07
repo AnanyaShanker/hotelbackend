@@ -13,6 +13,8 @@ public interface BookingsService {
     BookingsDTO getBookingDetails(int bookingId);
     void cancelBooking(int bookingId);
     void completeBooking(int bookingId);
-    List<ManagerBookingViewDTO> getDetailedBookingsForBranch(int branchId);
+    
+  List<ManagerBookingViewDTO> getDetailedBookingsForBranch(int branchId);
+    
     void updateBookingStatusBasedOnPayment(Payment payment);
 }

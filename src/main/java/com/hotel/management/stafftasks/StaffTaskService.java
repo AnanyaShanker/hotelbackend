@@ -1,7 +1,7 @@
 package com.hotel.management.stafftasks;
-
+ 
 import java.util.List;
-
+ 
 public interface StaffTaskService {
     StaffTaskDTO createTask(StaffTaskDTO dto);
     StaffTaskDTO getTask(int taskId);
@@ -9,7 +9,7 @@ public interface StaffTaskService {
     List<StaffTaskDTO> getTasksByRoom(int roomId);
     List<StaffTaskDTO> getAllTasks();
     StaffTaskDTO updateStatus(int taskId, String status, String remarks);
-
+ 
     // new
     List<StaffTaskDTO> getTasksByHotel(int hotelId);
 }

@@ -4,92 +4,50 @@ import java.time.LocalDateTime;
 
 public class Feedback {
 
-	private Integer feedbackId;
-	private Integer customerId;
-	private Integer bookingId;
-	private Integer facilityBookingId;
-	private Integer rating;
-	private String comments;
-	private String feedbackImage;
-	private LocalDateTime submissionDate;
+    private Integer feedbackId;
+    private Integer customerId;         // references users.user_id
+    private Integer bookingId;          // nullable
+    private Integer facilityBookingId;  // nullable
+    private Integer rating;             // 1–5
+    private String comments;
+    private LocalDateTime submissionDate;
 
-	public Feedback() {
-	}
+    public Feedback() {}
 
-	public Feedback(Integer feedbackId, Integer customerId, Integer bookingId, Integer facilityBookingId,
-			Integer rating, String comments, String feedbackImage, LocalDateTime submissionDate) {
+    public Feedback(Integer feedbackId, Integer customerId, Integer bookingId,
+                    Integer facilityBookingId, Integer rating,
+                    String comments, LocalDateTime submissionDate) {
+        this.feedbackId = feedbackId;
+        this.customerId = customerId;
+        this.bookingId = bookingId;
+        this.facilityBookingId = facilityBookingId;
+        this.rating = rating;
+        this.comments = comments;
+        this.submissionDate = submissionDate;
+    }
 
-		this.feedbackId = feedbackId;
-		this.customerId = customerId;
-		this.bookingId = bookingId;
-		this.facilityBookingId = facilityBookingId;
-		this.rating = rating;
-		this.comments = comments;
-		this.feedbackImage = feedbackImage;
-		this.submissionDate = submissionDate;
-	}
+    public Integer getFeedbackId() { return feedbackId; }
+    public void setFeedbackId(Integer feedbackId) { this.feedbackId = feedbackId; }
 
-	public Integer getFeedbackId() {
-		return feedbackId;
-	}
+    public Integer getCustomerId() { return customerId; }
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
 
-	public void setFeedbackId(Integer feedbackId) {
-		this.feedbackId = feedbackId;
-	}
+    public Integer getBookingId() { return bookingId; }
+    public void setBookingId(Integer bookingId) { this.bookingId = bookingId; }
 
-	public Integer getCustomerId() {
-		return customerId;
-	}
+    public Integer getFacilityBookingId() { return facilityBookingId; }
+    public void setFacilityBookingId(Integer facilityBookingId) {
+        this.facilityBookingId = facilityBookingId;
+    }
 
-	public void setCustomerId(Integer customerId) {
-		this.customerId = customerId;
-	}
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) { this.rating = rating; }
 
-	public Integer getBookingId() {
-		return bookingId;
-	}
+    public String getComments() { return comments; }
+    public void setComments(String comments) { this.comments = comments; }
 
-	public void setBookingId(Integer bookingId) {
-		this.bookingId = bookingId;
-	}
-
-	public Integer getFacilityBookingId() {
-		return facilityBookingId;
-	}
-
-	public void setFacilityBookingId(Integer facilityBookingId) {
-		this.facilityBookingId = facilityBookingId;
-	}
-
-	public Integer getRating() {
-		return rating;
-	}
-
-	public void setRating(Integer rating) {
-		this.rating = rating;
-	}
-
-	public String getComments() {
-		return comments;
-	}
-
-	public void setComments(String comments) {
-		this.comments = comments;
-	}
-
-	public String getFeedbackImage() {
-		return feedbackImage;
-	}
-
-	public void setFeedbackImage(String feedbackImage) {
-		this.feedbackImage = feedbackImage;
-	}
-
-	public LocalDateTime getSubmissionDate() {
-		return submissionDate;
-	}
-
-	public void setSubmissionDate(LocalDateTime submissionDate) {
-		this.submissionDate = submissionDate;
-	}
+    public LocalDateTime getSubmissionDate() { return submissionDate; }
+    public void setSubmissionDate(LocalDateTime submissionDate) {
+        this.submissionDate = submissionDate;
+    }
 }

@@ -1,6 +1,5 @@
 package com.hotel.management.feedback;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,116 +8,119 @@ import java.util.stream.Collectors;
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
 
-	@Autowired
-	private FeedbackRepository feedbackRepository;
+    private final FeedbackRepository feedbackRepository;
 
-	@Override
-	public FeedbackDto addFeedback(FeedbackDto dto) {
+    public FeedbackServiceImpl(FeedbackRepository feedbackRepository) {
+        this.feedbackRepository = feedbackRepository;
+    }
 
-		validateBookingRelationship(dto);
+    // --------------- CRUD ---------------
 
-		Feedback feedback = convertToEntity(dto);
+    @Override
+    public FeedbackDto createFeedback(FeedbackDto dto) {
 
-		feedbackRepository.addFeedback(feedback);
+        // Business rule: exactly ONE of bookingId or facilityBookingId should be set
+        boolean hasBooking = dto.getBookingId() != null;
+        boolean hasFacility = dto.getFacilityBookingId() != null;
 
-		return dto;
-	}
+        if (hasBooking == hasFacility) { // both true or both false
+            throw new IllegalArgumentException(
+                    "Feedback must be linked to EITHER a room booking OR a facility booking (exactly one).");
+        }
 
-	@Override
-	public FeedbackDto getFeedbackById(Integer feedbackId) {
+        Feedback entity = toEntity(dto);
+        Integer id = feedbackRepository.addFeedback(entity);
+        entity.setFeedbackId(id);
 
-		Feedback feedback = feedbackRepository.getFeedbackById(feedbackId);
+        return toDto(entity);
+    }
 
-		if (feedback == null) {
-			throw new RuntimeException("Feedback not found with ID " + feedbackId);
-		}
+    @Override
+    public FeedbackDto getById(Integer id) {
+        Feedback entity = feedbackRepository.getById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found with id " + id));
+        return toDto(entity);
+    }
 
-		return convertToDto(feedback);
-	}
+    @Override
+    public List<FeedbackDto> getAll() {
+        return feedbackRepository.getAll()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 
-	@Override
-	public List<FeedbackDto> getAllFeedback() {
+    @Override
+    public List<FeedbackDto> getByCustomer(Integer customerId) {
+        return feedbackRepository.getByCustomer(customerId)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 
-		return feedbackRepository.getAllFeedback().stream().map(this::convertToDto).collect(Collectors.toList());
-	}
+    @Override
+    public List<FeedbackDto> getByBooking(Integer bookingId) {
+        return feedbackRepository.getByBooking(bookingId)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 
-	@Override
-	public List<FeedbackDto> getFeedbackByCustomer(Integer customerId) {
+    @Override
+    public List<FeedbackDto> getByFacilityBooking(Integer facilityBookingId) {
+        return feedbackRepository.getByFacilityBooking(facilityBookingId)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 
-		return feedbackRepository.getFeedbackByCustomer(customerId).stream().map(this::convertToDto)
-				.collect(Collectors.toList());
-	}
+    @Override
+    public FeedbackDto update(Integer id, FeedbackDto dto) {
+        Feedback existing = feedbackRepository.getById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found with id " + id));
 
-	@Override
-	public List<FeedbackDto> getFeedbackByBooking(Integer bookingId) {
+        if (dto.getRating() != null) existing.setRating(dto.getRating());
+        if (dto.getComments() != null) existing.setComments(dto.getComments());
 
-		return feedbackRepository.getFeedbackByBooking(bookingId).stream().map(this::convertToDto)
-				.collect(Collectors.toList());
-	}
+        feedbackRepository.updateFeedback(id, existing);
+        return toDto(existing);
+    }
 
-	@Override
-	public List<FeedbackDto> getFeedbackByFacilityBooking(Integer facilityBookingId) {
+    @Override
+    public void delete(Integer id) {
+        feedbackRepository.deleteFeedback(id);
+    }
 
-		return feedbackRepository.getFeedbackByFacilityBooking(facilityBookingId).stream().map(this::convertToDto)
-				.collect(Collectors.toList());
-	}
+    // --------------- Admin view ---------------
 
-	@Override
-	public FeedbackDto updateFeedback(Integer feedbackId, FeedbackDto dto) {
+    @Override
+    public List<FeedbackDisplayDto> getAdminDisplayList() {
+        return feedbackRepository.getAdminDisplayList();
+    }
 
-		Feedback existing = feedbackRepository.getFeedbackById(feedbackId);
+    // --------------- Helpers ---------------
 
-		if (existing == null) {
-			throw new RuntimeException("Feedback not found with ID " + feedbackId);
-		}
+    private FeedbackDto toDto(Feedback entity) {
+        return new FeedbackDto(
+                entity.getFeedbackId(),
+                entity.getCustomerId(),
+                entity.getBookingId(),
+                entity.getFacilityBookingId(),
+                entity.getRating(),
+                entity.getComments(),
+                entity.getSubmissionDate()
+        );
+    }
 
-		validateBookingRelationship(dto);
-
-		Feedback updated = convertToEntity(dto);
-		updated.setFeedbackId(feedbackId);
-
-		feedbackRepository.updateFeedback(feedbackId, updated);
-
-		return convertToDto(updated);
-	}
-
-	@Override
-	public void deleteFeedback(Integer feedbackId) {
-
-		Feedback existing = feedbackRepository.getFeedbackById(feedbackId);
-
-		if (existing == null) {
-			throw new RuntimeException("Feedback not found with ID " + feedbackId);
-		}
-
-		feedbackRepository.deleteFeedback(feedbackId);
-	}
-
-	/*
-	 * -------------------------- Utility Methods ---------------------------
-	 */
-	private Feedback convertToEntity(FeedbackDto dto) {
-
-		return new Feedback(dto.getFeedbackId(), dto.getCustomerId(), dto.getBookingId(), dto.getFacilityBookingId(),
-				dto.getRating(), dto.getComments(), dto.getFeedbackImage(), dto.getSubmissionDate());
-	}
-
-	private FeedbackDto convertToDto(Feedback entity) {
-
-		return new FeedbackDto(entity.getFeedbackId(), entity.getCustomerId(), entity.getBookingId(),
-				entity.getFacilityBookingId(), entity.getRating(), entity.getComments(), entity.getFeedbackImage(),
-				entity.getSubmissionDate());
-	}
-
-	private void validateBookingRelationship(FeedbackDto dto) {
-
-		// Rule: either booking or facility booking should be filled, not both
-		if (dto.getBookingId() != null && dto.getFacilityBookingId() != null) {
-			throw new RuntimeException("Feedback cannot have both bookingId and facilityBookingId.");
-		}
-
-		if (dto.getBookingId() == null && dto.getFacilityBookingId() == null) {
-			throw new RuntimeException("Feedback must be linked to either a booking or facility booking.");
-		}
-	}
+    private Feedback toEntity(FeedbackDto dto) {
+        return new Feedback(
+                dto.getFeedbackId(),
+                dto.getCustomerId(),
+                dto.getBookingId(),
+                dto.getFacilityBookingId(),
+                dto.getRating(),
+                dto.getComments(),
+                dto.getSubmissionDate()
+        );
+    }
 }
